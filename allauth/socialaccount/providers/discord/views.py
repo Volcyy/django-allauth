@@ -12,6 +12,7 @@ class DiscordOAuth2Adapter(OAuth2Adapter):
     provider_id = DiscordProvider.id
     access_token_url = 'https://discordapp.com/api/oauth2/token'
     authorize_url = 'https://discordapp.com/api/oauth2/authorize'
+    guilds_url = 'https://discordapp.com/api/users/@me/guilds'
     profile_url = 'https://discordapp.com/api/users/@me'
 
     def complete_login(self, request, app, token, **kwargs):
@@ -19,12 +20,15 @@ class DiscordOAuth2Adapter(OAuth2Adapter):
             'Authorization': 'Bearer {0}'.format(token.token),
             'Content-Type': 'application/json',
         }
-        extra_data = requests.get(self.profile_url, headers=headers)
+        guild_data = requests.get(self.guilds_url, headers=headers).json()
+        profile_data = requests.get(self.profile_url, headers=headers).json()
 
-        return self.get_provider().sociallogin_from_response(
-            request,
-            extra_data.json()
-        )
+        extra_data = {
+            **profile_data,
+            'guilds': guild_data
+        }
+
+        return self.get_provider().sociallogin_from_response(request, extra_data)
 
 
 oauth2_login = OAuth2LoginView.adapter_view(DiscordOAuth2Adapter)
