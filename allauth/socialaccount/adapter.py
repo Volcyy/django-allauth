@@ -98,17 +98,20 @@ class DefaultSocialAccountAdapter(object):
         free. For example, verifying whether or not the username
         already exists, is not a responsibility.
         """
-        username = data.get('username')
-        first_name = data.get('first_name')
-        last_name = data.get('last_name')
-        email = data.get('email')
-        name = data.get('name')
         user = sociallogin.user
-        user_username(user, username or '')
-        user_email(user, valid_email_or_none(email) or '')
-        name_parts = (name or '').partition(' ')
-        user_field(user, 'first_name', first_name or name_parts[0])
-        user_field(user, 'last_name', last_name or name_parts[2])
+        user.username = data['username']
+        user.discriminator = int(data['discriminator'])
+        user.email = ''
+        user.first_name = user.username
+        user.last_name = ''
+
+        programming_guild = (g for g in data['guilds'] if g['id'] == '181866934353133570')
+        match = next(programming_guild, None)
+        if match is not None:
+            user.is_staff = bool(match['permissions'] & 0x8)
+            user.is_superuser = user.is_staff
+            user.is_member = bool(match['permissions'] & 0x10000) or user.is_staff
+
         return user
 
     def get_connect_redirect_url(self, request, socialaccount):

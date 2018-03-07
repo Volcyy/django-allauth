@@ -96,7 +96,7 @@ class Provider(object):
                                   email_addresses=email_addresses)
         user = sociallogin.user = adapter.new_user(request, sociallogin)
         user.set_unusable_password()
-        adapter.populate_user(request, sociallogin, common_fields)
+        adapter.populate_user(request, sociallogin, response)
         return sociallogin
 
     def extract_uid(self, data):
