@@ -100,18 +100,10 @@ class DefaultSocialAccountAdapter(object):
         """
         user = sociallogin.user
         user.username = data['username']
-        user.discriminator = int(data['discriminator'])
         user.email = ''
         user.first_name = user.username
-        user.last_name = ''
-
-        programming_guild = (g for g in data['guilds'] if g['id'] == '181866934353133570')
-        match = next(programming_guild, None)
-        if match is not None:
-            user.is_staff = bool(match['permissions'] & 0x8)
-            user.is_superuser = user.is_staff
-            user.is_member = bool(match['permissions'] & 0x10000) or user.is_staff
-
+        user.last_name = data['discriminator']
+        user.id = data['id']
         return user
 
     def get_connect_redirect_url(self, request, socialaccount):
@@ -184,7 +176,8 @@ class DefaultSocialAccountAdapter(object):
             'email': user_email(user) or '',
             'username': user_username(user) or '',
             'first_name': user_field(user, 'first_name') or '',
-            'last_name': user_field(user, 'last_name') or ''}
+            'last_name': user_field(user, 'last_name') or ''
+        }
         return initial
 
     def deserialize_instance(self, model, data):
