@@ -24,7 +24,7 @@ class DiscordProvider(OAuth2Provider):
         )
 
     def get_default_scope(self):
-        return ['identify', 'guilds']
+        return ['identify']
 
 
 provider_classes = [DiscordProvider]
